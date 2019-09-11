@@ -1,4 +1,4 @@
-package aep_2;
+package conceito;
 
 public class Nota {
 	private double valor;
@@ -11,7 +11,7 @@ public class Nota {
 	
 	public void validarNota(double valor) {
 		if(valor < 0 || valor > 10) {
-			throw new RuntimeException("Nota inserida inválida! Por favor, tente novamente...");
+			throw new RuntimeException("Nota inserida invï¿½lida! Por favor, tente novamente...");
 		}else if(valor >= 6){
 			aprovado = true;
 		}else {
@@ -23,7 +23,7 @@ public class Nota {
 		return valor;
 	}
 	
-	public boolean getAprovação() {
+	public boolean getAprovaÃ§Ã£o() {
 		return aprovado;
 	}
 }

@@ -1,4 +1,4 @@
-package aep_2;
+package conceito;
 
 public class Aluno {
 	private String nome;
@@ -20,7 +20,7 @@ public class Aluno {
 	
 	public void validaRA(Integer ra) {
 		if(ra < 0 || ra > 99999999) {
-			throw new RuntimeException("RA do aluno inválido! Por favor, tente novamente...");
+			throw new RuntimeException("RA do aluno invï¿½lido! Por favor, tente novamente...");
 		}
 	}
 }

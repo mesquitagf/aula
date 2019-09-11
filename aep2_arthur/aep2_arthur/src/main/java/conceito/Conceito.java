@@ -1,8 +1,8 @@
-package aep_2;
+package conceito;
 
 public class Conceito {
 	private final String id;
-	private Avaliação avaliação;
+	private AvaliaÃ§Ã£o avaliaÃ§Ã£o;
 	private Aluno aluno;
 	private Nota nota;
 	
@@ -10,8 +10,8 @@ public class Conceito {
 		this.id = id;
 	}
 	
-	public void adicionarAvaliação(Avaliação avaliação) {
-		this.avaliação = avaliação;
+	public void adicionarAvaliaÃ§Ã£o(AvaliaÃ§Ã£o avaliaÃ§Ã£o) {
+		this.avaliaÃ§Ã£o = avaliaÃ§Ã£o;
 	}
 
 	public void adicionarAluno(Aluno aluno) {
@@ -26,8 +26,8 @@ public class Conceito {
 		return id;
 	}
 	
-	public Avaliação getAvaliação() {
-		return avaliação;
+	public AvaliaÃ§Ã£o getAvaliaÃ§Ã£o() {
+		return avaliaÃ§Ã£o;
 	}
 	
 	public Aluno getAluno() {

@@ -11,7 +11,7 @@ public class Nota {
 	
 	public void validarNota(double valor) {
 		if(valor < 0 || valor > 10) {
-			throw new RuntimeException("Nota inserida inv�lida! Por favor, tente novamente...");
+			throw new RuntimeException("Nota inserida inválida! Por favor, tente novamente...");
 		}else if(valor >= 6){
 			aprovado = true;
 		}else {

@@ -1,4 +1,4 @@
-package src.arthur;
+package src.aep2_arthur;
 
 import junit.framework.Test;
 import junit.framework.TestCase;

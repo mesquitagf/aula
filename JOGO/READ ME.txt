@@ -1,0 +1,8 @@
+*==========*
+FLAPPY ALIEN
+*==========*
+
+É um jogo bem simples... Basta você utilizar o botão esquerdo do mouse, para fazer com que a espaço-nave continue seu caminho sem atingir os obstáculos.
+A medida que você vai progredindo no jogo, a velocidade dele vai aumentando, tornando o desafio mais interessante...
+
+E, ai?! Quão longe você consegue ir?

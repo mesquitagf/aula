@@ -1,0 +1,341 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8"/>
+    <title>Meu Game</title>
+    <script src="sprite.js"></script>
+    <style>
+      canvas{
+        position: absolute;
+        left: 0px;
+        right: 0px;
+        top: 0px;
+        bottom: 0px;
+        margin: auto;
+      }
+    </style>
+  </head>
+  <body>
+    <audio controls autoplay="true" loop="15">
+      <source src="music.mp3" type="audio/mpeg">
+    </audio>
+    <script>
+      // ===== GLOBAIS =====
+
+      var canvas;
+      var ctx;
+      var altura;
+      var largura;
+      var maxPulos = 3;
+      var velocidade = 5;
+      var estadoAtual;
+      var estados = {
+        jogar: 0,
+        jogando: 1,
+        perdeu: 2
+      };
+      var record; 
+      var img;
+
+      // ===== CHAO =====
+      var chao = { //caracteristicas do chao
+        y: 492,
+        x: 0,
+        altura: 108,
+        // cor: "#fff",
+        
+        atualiza: function(){ //faz o movimento do chao
+          this.x -= velocidade;
+          if(this.x <= -(velocidade * 5)){
+            this.x = 0;
+          }
+        },
+
+        desenha: function(){
+          spriteChao.desenha(this.x, this.y);
+          spriteChao.desenha(this.x + spriteChao.largura - 10, this.y);
+          // para fazer o chao como um bloco descomentar a linha a baixo
+          // ctx.fillStyle = this.cor;
+          // ctx.fillRect(0, this.y, largura, this.altura);
+        }
+      };
+
+      // ===== BLOCO  / BONECO =====
+      var bloco = {  //caracteristicas do bloco
+        x: 50,
+        y: 0,
+        // altura: 50,
+        altura: spriteBoneco.altura,
+        largura: spriteBoneco.largura,
+        // largura: 50,
+        // cor: "#ff9239",
+        gravidade: 1.2,
+        velocidade: 0,
+        forcaDoPulo: 20,
+        qtdPulo: 0,
+        score: 0,
+        
+        atualiza: function(){ //gravidade do bloco
+          this.velocidade += this.gravidade;
+          this.y += this.velocidade;
+
+          if(this.y > chao.y - this.altura && estadoAtual != estados.perdeu){
+                                           // ^faz com que o bloco "caia" quando perder o jogo
+            this.y = chao.y - this.altura;
+
+            this.qtdPulo = 0;
+            this.velocidade = 0;
+          }
+        },
+
+        desenha: function(){
+          // ctx.fillStyle = this.cor;
+          // ctx.fillRect(this.x, this.y, this.largura, this.altura);
+          spriteBoneco.desenha(this.x, this.y);
+        },
+
+        pula: function(){ //realiza e limita a quantidade de pulos
+          if(this.qtdPulo < maxPulos){
+            this.velocidade = -this.forcaDoPulo;
+            this.qtdPulo++;
+          }
+        },
+
+        reset: function(){ // coloca o bloquinho na posicao inicial
+          this.velocidade = 0;
+          this.y = 0;
+
+          if(this.score > record){
+            localStorage.setItem("record", this.score);
+            record = this.score;
+          }
+
+          this.score = 0;
+        }
+
+      }
+
+      // ===== OBSTACULOS =====
+      var obstaculos = {
+        _obs: [],
+        cores: ["#2c7724", "#63dd56", "#2a3e28", "#0b6701", "#bdf1b7"],
+        tempoInsere: 0,
+        cont_nivel: 0,
+        cont: 0,
+
+        insere: function(){
+          this._obs.push({
+            x: largura,
+            /*
+            Math.random() = gera um número decimal aleatorio entre 0 - 1 (exclui o 1);
+            Math.floor() = filtra para ser apenas gerados numero inteiros;
+            */
+            // largura: 30 + Math.floor(21 * Math.random()),
+            largura: 60,
+            altura: 30 + Math.floor(121 * Math.random()),
+            cor: this.cores[Math.floor(5 * Math.random())]
+          });
+
+              // alert(this.cont_nivel);
+          switch(this.cont_nivel){
+            case 0:
+              this.tempoInsere = 55 + Math.floor(26 * Math.random()); //controla o intervalo de tempo de criacao de obstaculo
+            break;
+            case 1: 
+              this.tempoInsere = 45 + Math.floor(26 * Math.random()); //controla o intervalo de tempo de criacao de obstaculo
+            break;
+            case 2: 
+              this.tempoInsere = 35 + Math.floor(26 * Math.random()); //controla o intervalo de tempo de criacao de obstaculo
+            break;
+          }
+
+          // this.tempoInsere = 60;
+        },
+
+        atualiza: function(){
+          // o if vai inserir o bloco na tela somente quando o valor for igual a 0, caso contrario ele continuara subtraindo
+          if(this.tempoInsere == 0){
+            this.insere(this.cont_nivel);
+          }else{
+            this.tempoInsere--;
+          }
+
+          switch(this.cont_nivel){
+            case 1: velocidade = 10;
+            break;
+            case 2: velocidade = 15;
+            break;
+          }
+
+          for(var i = 0, tam = this._obs.length; i < tam; i++){
+            var obs = this._obs[i];
+
+            obs.x -= velocidade; //move a posicao do bloco na tela de acordo com a velocidade
+
+            if(bloco.x < obs.x + obs.largura && bloco.x + bloco.largura >= obs.x && bloco.y + bloco.altura >= chao.y - obs.altura){
+              //1ª  passou todo o obs        /    2ª chegou perto do proximo     /  3ª altura do bloco maior que o obs
+              estadoAtual = estados.perdeu;
+            } else if(obs.x == 0) {
+              bloco.score++; //soma a pontuacao
+              if(bloco.score == 5){
+                this.cont_nivel++;
+              } else if(bloco.score == 15){
+                this.cont_nivel++;
+              }
+            } else if(obs.x <= -obs.largura){
+                this._obs.splice(i, 1); //apaga o bloco quando ele sair da tela
+                tam--;
+                i--; 
+                /*
+                tam--/i-- = resolvem o problema do splice apagar uma posicao no array, e o for, tentar acessar essa posicao depois (mais de 1 bloco na tela)
+                */
+            }
+          }
+        },
+
+        desenha: function(){
+          for(var i = 0, tam = this._obs.length; i < tam; i++){
+            var obs = this._obs[i];
+            ctx.fillStyle = obs.cor;
+            ctx.fillRect(obs.x, chao.y - obs.altura, obs.largura, obs.altura);
+          }
+        },
+
+        limpa: function(){ //reseta os obstaculos
+          velocidade = 5;
+          this.cont_nivel = 0;
+          this._obs = [];
+        }
+      }
+//=======================================================================================================================================================
+
+      function menu(){
+
+      }
+
+      function clique(event){
+        switch(estadoAtual){
+          case 0:
+            estadoAtual = estados.jogando;
+          break;
+          case 1:
+            bloco.pula();
+          break;
+          case 2:
+            if(bloco.y >= 2 * altura){
+              estadoAtual = estados.jogar;
+              obstaculos.limpa();
+              bloco.reset();
+            }
+          break;
+        }
+      }
+
+      function main(){
+
+        largura = window.innerWidth;
+        altura = window.innerHeight;
+
+        if(largura >= 500){ //configura o tamanho da tela do jogo
+          largura = 600;
+          altura = 600;
+        }
+
+        canvas = document.createElement("canvas");  //cria o Canvas
+        canvas.width = largura;
+        canvas.height = altura;
+        canvas.style.border = "solid 1px #000";
+
+        ctx = canvas.getContext("2d");
+        document.body.appendChild(canvas);
+        document.addEventListener("mousedown", clique);
+
+        estadoAtual = estados.jogar;
+        record = localStorage.getItem("record");
+
+        if(record == null){
+          record = 0;
+        }
+
+        img = new Image();
+        img.src = "images/sprite.png";
+
+        roda();
+      }
+
+      function roda(){
+        atualiza();
+        desenha();
+
+        window.requestAnimationFrame(roda);
+      }
+
+      function atualiza(){
+        if(estadoAtual == estados.jogando){
+          obstaculos.atualiza();
+          chao.atualiza();
+        }
+
+        bloco.atualiza();
+      }
+
+      function desenha(){
+        bg.desenha(0, 0); //desenha o background com a imagem
+
+
+        switch(estadoAtual){
+          case 0:
+
+            spriteLogo.desenha((largura/2) - spriteLogo.largura/2, (altura/2) - spriteLogo.altura/2 - 50);
+            // ctx.fillStyle = "green";
+            // ctx.fillRect((largura/2) - 50, (altura/2) - 50, 100, 100);
+          break;
+          case 1:
+            obstaculos.desenha();
+            ctx.fillStyle = "#fff";
+            ctx.font = "50px Arial";
+            ctx.fillText(bloco.score, 30, 68); //enquanto esta no estado "jogando", a pontuacao aparece no canto superior esquerdo
+          break;
+          case 2:
+            // ctx.fillStyle = "red";
+            // ctx.fillRect((largura/2) - 50, (altura/2) - 50, 100, 100);
+            spritePerdeu.desenha((largura/2) - spritePerdeu.largura/2, (altura/2) - spritePerdeu.altura/2 - 150);
+
+            ctx.save(); //salva a tela
+            ctx.translate(largura/2, altura/2); //transfere a copia da tela para determinada posicao
+
+            ctx.fillStyle = "#fff";
+
+            if(bloco.score > record){
+              ctx.fillText("Novo Record!", -150, -45);
+            }else if(record < 10){
+              ctx.fillText("Record: " + record, -99, -45);
+            }else if(record >= 10 && record < 100){
+              ctx.fillText("Record: " + record, -112, -45);
+            }else{
+              ctx.fillText("Record: " + record, -125, -45);
+            }
+
+            //condicional abaixo para centralizar o resultado
+            if(bloco.score < 10){
+              ctx.fillText("Score: " + bloco.score, -85, 19);
+            }else if(bloco.score >= 10 && bloco.score < 100){
+              ctx.fillText("Score: " + bloco.score, -98, 19);
+            }else{
+              ctx.fillText("Score: " + bloco.score, -112, 19);
+            }
+
+            ctx.restore(); //reseta a tela
+          break;
+        }
+
+
+        chao.desenha();
+        bloco.desenha();
+      }
+
+      //inicializa o jogo
+      main();
+    </script>
+  </body>
+</html>
